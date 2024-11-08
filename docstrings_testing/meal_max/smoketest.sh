@@ -64,10 +64,11 @@ create_meal() {
   price=$3
   difficulty=$4
 
-  echo "Adding meal ($meal - $cuisine, $price, $difficulty) to the leaderboard..."
+  echo "Adding meal ($meal  $cuisine, $price, $difficulty) to the leaderboard..."
   curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":\"$price\", \"difficulty\":$difficulty}" | grep -q '"status": "success"'
+    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":$difficulty}" | grep -q '"status": "success"'
 
+  #echo $?
   if [ $? -eq 0 ]; then
     echo "Meal added successfully."
   else
@@ -468,7 +469,7 @@ check_health
 check_db
 
 # Clear the catalog
-#clear_leaderboard
+clear_leaderboard
 
 # Create songs
 create_meal "Spaghetti" "Italian" 12.5 "MED" 
