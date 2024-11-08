@@ -130,7 +130,7 @@ def test_delete_meal_bad_id(mock_cursor):
         delete_meal(999)
 
 def test_delete_meal_already_deleted(mock_cursor):
-    """Test error when trying to delete a song that's already marked as deleted."""
+    """Test error when trying to delete a meal that's already marked as deleted."""
 
     # Simulate that the song exists but is already marked as deleted
     mock_cursor.fetchone.return_value = ([True])
