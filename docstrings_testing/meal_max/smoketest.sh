@@ -58,15 +58,15 @@ clear_leaderboard() {
   curl -s -X DELETE "$BASE_URL/clear-leaderboard" | grep -q '"status": "success"'
 }
 
-create_song() {
+create_meal() {
   meal=$1
   cuisine=$2
   price=$3
   difficulty=$4
 
-  echo "Adding song ($artist - $title, $year) to the playlist..."
-  curl -s -X POST "$BASE_URL/create-song" -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year, \"genre\":\"$genre\", \"duration\":$duration}" | grep -q '"status": "success"'
+  echo "Adding meal ($meal - $cuisine, $price, $difficulty) to the leaderboard..."
+  curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
+    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":\"$price\", \"difficulty\":$difficulty}" | grep -q '"status": "success"'
 
   if [ $? -eq 0 ]; then
     echo "Meal added successfully."
@@ -82,20 +82,20 @@ delete_meal_by_id() {
   echo "Deleting meal by ID ($meal_id)..."
   response=$(curl -s -X DELETE "$BASE_URL/delete-meal/$meal_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song deleted successfully by ID ($meal_id)."
+    echo "Meal deleted successfully by ID ($meal_id)."
   else
-    echo "Failed to delete song by ID ($meal_id)."
+    echo "Failed to delete meal by ID ($meal_id)."
     exit 1
   fi
 }
 
-get_all_songs() {
-  echo "Getting all songs in the playlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-songs-from-catalog")
+get_leaderboard() {
+  echo "Getting all meals in the leaderboard..."
+  response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-leaderboard")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "All songs retrieved successfully."
+    echo "All meals retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Songs JSON:"
+      echo "Meals JSON:"
       echo "$response" | jq .
     fi
   else
@@ -104,38 +104,36 @@ get_all_songs() {
   fi
 }
 
-get_song_by_id() {
-  song_id=$1
+get_meal_by_id() {
+  meal_id=$1
 
-  echo "Getting song by ID ($song_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-catalog-by-id/$song_id")
+  echo "Getting meal by ID ($meal_id)..."
+  response=$(curl -s -X GET "$BASE_URL/get-meal-from-leaderboard-by-id/$meal_id")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by ID ($song_id)."
+    echo "Meal retrieved successfully by ID ($meal_id)."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON (ID $song_id):"
+      echo "Meal JSON (ID $meal_id):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get song by ID ($song_id)."
+    echo "Failed to get meal by ID ($meal_id)."
     exit 1
   fi
 }
 
-get_song_by_compound_key() {
-  artist=$1
-  title=$2
-  year=$3
+get_meal_by_name() {
+  meal_name=$1
 
-  echo "Getting song by compound key (Artist: '$artist', Title: '$title', Year: $year)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-catalog-by-compound-key?artist=$(echo $artist | sed 's/ /%20/g')&title=$(echo $title | sed 's/ /%20/g')&year=$year")
+  echo "Getting meal by name (Meal: '$meal', Cuisine: '$cuisine', Price: $price)..."
+  response=$(curl -s -X GET "$BASE_URL/get-meal-from-leaderboard-by-name?meal=$(echo $meal | sed 's/ /%20/g')&Cuisine=$(echo $cuisine | sed 's/ /%20/g')&price=$price")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by compound key."
+    echo "Meal retrieved successfully by name."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON (by compound key):"
+      echo "Meal JSON (by name):"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get song by compound key."
+    echo "Failed to get meal by compound key."
     exit 1
   fi
 }
@@ -470,19 +468,19 @@ check_health
 check_db
 
 # Clear the catalog
-clear_catalog
+#clear_leaderboard
 
 # Create songs
-create_song "The Beatles" "Hey Jude" 1968 "Rock" 180
-create_song "The Rolling Stones" "Paint It Black" 1966 "Rock" 180
-create_song "The Beatles" "Let It Be" 1970 "Rock" 180
-create_song "Queen" "Bohemian Rhapsody" 1975 "Rock" 180
-create_song "Led Zeppelin" "Stairway to Heaven" 1971 "Rock" 180
+create_meal "Spaghetti" "Italian" 12.5 "MED" 
+create_meal "Pasta" "Italian" 20 "LOW" 
+create_meal "Burger" "American" 13 "HIGH" 
+create_meal "Sushi" "Japanese" 15 "LOW" 
+create_meal "Hummus" "Arabic" 5 "MED" 
 
-delete_song_by_id 1
-get_all_songs
+delete_meal_by_id 1
+get_leaderboard
 
-get_song_by_id 2
+get_meal_by_id 2
 get_song_by_compound_key "The Beatles" "Let It Be" 1970
 get_random_song
 

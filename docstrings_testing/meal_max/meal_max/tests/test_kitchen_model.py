@@ -203,7 +203,7 @@ def test_get_meal_by_name(mock_cursor):
     result = get_meal_by_name("Artist Name", "Song Title", 2022)
 
     # Expected result based on the simulated fetchone return value
-    expected_result = Meal(1, "Meal", "uisine", 2022, "Pop", 180)
+    expected_result = Meal(1, "Meal", "cuisine", 2022, "Pop", 180)
 
     # Ensure the result matches the expected output
     assert result == expected_result, f"Expected {expected_result}, got {result}"
