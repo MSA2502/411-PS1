@@ -139,15 +139,15 @@ def test_delete_meal_already_deleted(mock_cursor):
     with pytest.raises(ValueError, match="Song with ID 999 has already been deleted"):
         delete_meal(999)
 
-def test_clear_meals(mock_cursor, mocker):
-    """Test clearing the entire meal catalog (removes all meals)."""
+def test_clear_leaderboard(mock_cursor, mocker):
+    """Test clearing the entire meal leaderboard (removes all meals)."""
 
     # Mock the file reading
     mocker.patch.dict('os.environ', {'SQL_CREATE_TABLE_PATH': 'sql/create_meal_table.sql'})
     mock_open = mocker.patch('builtins.open', mocker.mock_open(read_data="The body of the create statement"))
 
     # Call the clear_database function
-    clear_meals()
+    test_clear_leaderboard()
 
     # Ensure the file was opened using the environment variable's path
     mock_open.assert_called_once_with('sql/create_meal_table.sql', 'r')
@@ -168,7 +168,7 @@ def test_get_meal_by_id(mock_cursor):
     result = get_meal_by_id(1)
 
     # Expected result based on the simulated fetchone return value
-    expected_result = Meal(1, "Artist Name", "Song Title", 2022, "Pop", 180)
+    expected_result = Meal(1, "Meal", "Cusine", 12.5, "Price", 180)
 
     # Ensure the result matches the expected output
     assert result == expected_result, f"Expected {expected_result}, got {result}"
@@ -203,7 +203,7 @@ def test_get_meal_by_name(mock_cursor):
     result = get_meal_by_name("Artist Name", "Song Title", 2022)
 
     # Expected result based on the simulated fetchone return value
-    expected_result = Meal(1, "Artist Name", "Song Title", 2022, "Pop", 180)
+    expected_result = Meal(1, "Meal", "uisine", 2022, "Pop", 180)
 
     # Ensure the result matches the expected output
     assert result == expected_result, f"Expected {expected_result}, got {result}"
