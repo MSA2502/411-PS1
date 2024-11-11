@@ -125,8 +125,8 @@ get_meal_by_id() {
 get_meal_by_name() {
   meal_name=$1
 
-  echo "Getting meal by name (Meal: '$meal', Cuisine: '$cuisine', Price: $price)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name?meal=$(echo $meal | sed 's/ /%20/g')&Cuisine=$(echo $cuisine | sed 's/ /%20/g')&price=$price")
+  echo "Getting meal by name $meal_name"
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name/$meal_name")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal retrieved successfully by name."
     if [ "$ECHO_JSON" = true ]; then
@@ -308,7 +308,7 @@ get_combatants
 get_leaderboard
 
 get_meal_by_id 2
-get_meal_by_name "Pizza" "Italian" 12.5
+get_meal_by_name "Burger"
 #get_random_song
 
 clear_playlist
