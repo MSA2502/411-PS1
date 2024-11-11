@@ -20,10 +20,10 @@ def mock_random_org(mocker):
 
 def test_get_random(mock_random_org):
     """Test retrieving a random number from random.org."""
-    result = get_random(NUM_MEALS)
+    result = get_random()
 
     # Assert that the result is the mocked random number
     assert result == RANDOM_NUMBER, f"Expected random number {RANDOM_NUMBER}, but got {result}"
 
     # Ensure that the correct URL was called
-    requests.get.assert_called_once_with("https://www.random.org/integers/?num=1&min=1&max=100&col=1&base=10&format=plain&rnd=new", timeout=5)
+    requests.get.assert_called_once_with("https://www.random.org/decimal-fractions/?num=1&dec=2&col=1&format=plain&rnd=new", timeout=5)
