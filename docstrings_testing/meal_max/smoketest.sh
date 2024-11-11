@@ -53,10 +53,11 @@ check_db() {
 #
 ##########################################################
 
-clear_leaderboard() {
-  echo "Clearing the leaderboard..."
-  curl -s -X DELETE "$BASE_URL/clear-leaderboard" | grep -q '"status": "success"'
+clear_catalog() {
+  echo "Clearing the playlist..."
+  curl -s -X DELETE "$BASE_URL/clear-catalog" | grep -q '"status": "success"'
 }
+
 
 create_meal() {
   meal=$1
@@ -64,11 +65,9 @@ create_meal() {
   price=$3
   difficulty=$4
 
-  echo "Adding meal ($meal  $cuisine, $price, $difficulty) to the leaderboard..."
+  echo "Adding meal: ($meal, $cuisine, $price, $difficulty)"
   curl -s -X POST "$BASE_URL/create-meal" -H "Content-Type: application/json" \
-    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":$difficulty}" | grep -q '"status": "success"'
-
-  #echo $?
+    -d "{\"meal\":\"$meal\", \"cuisine\":\"$cuisine\", \"price\":$price, \"difficulty\":\"$difficulty\"}" | grep -q '"status": "success"'
   if [ $? -eq 0 ]; then
     echo "Meal added successfully."
   else
@@ -77,11 +76,12 @@ create_meal() {
   fi
 }
 
-delete_meal_by_id() {
+delete_meal() {
   meal_id=$1
 
   echo "Deleting meal by ID ($meal_id)..."
   response=$(curl -s -X DELETE "$BASE_URL/delete-meal/$meal_id")
+  #echo $?
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal deleted successfully by ID ($meal_id)."
   else
@@ -90,17 +90,17 @@ delete_meal_by_id() {
   fi
 }
 
-get_leaderboard() {
-  echo "Getting all meals in the leaderboard..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-meals-from-leaderboard")
+get_combatants() {
+  echo "Getting all meals in the catalog..."
+  response=$(curl -s -X GET "$BASE_URL/get-combatants")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "All meals retrieved successfully."
+    echo "All combatants retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Meals JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get songs."
+    echo "Failed to get combatants."
     exit 1
   fi
 }
@@ -109,7 +109,7 @@ get_meal_by_id() {
   meal_id=$1
 
   echo "Getting meal by ID ($meal_id)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-from-leaderboard-by-id/$meal_id")
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-id/$meal_id")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal retrieved successfully by ID ($meal_id)."
     if [ "$ECHO_JSON" = true ]; then
@@ -126,7 +126,7 @@ get_meal_by_name() {
   meal_name=$1
 
   echo "Getting meal by name (Meal: '$meal', Cuisine: '$cuisine', Price: $price)..."
-  response=$(curl -s -X GET "$BASE_URL/get-meal-from-leaderboard-by-name?meal=$(echo $meal | sed 's/ /%20/g')&Cuisine=$(echo $cuisine | sed 's/ /%20/g')&price=$price")
+  response=$(curl -s -X GET "$BASE_URL/get-meal-by-name?meal=$(echo $meal | sed 's/ /%20/g')&Cuisine=$(echo $cuisine | sed 's/ /%20/g')&price=$price")
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Meal retrieved successfully by name."
     if [ "$ECHO_JSON" = true ]; then
@@ -134,22 +134,7 @@ get_meal_by_name() {
       echo "$response" | jq .
     fi
   else
-    echo "Failed to get meal by compound key."
-    exit 1
-  fi
-}
-
-get_random_song() {
-  echo "Getting a random song from the catalog..."
-  response=$(curl -s -X GET "$BASE_URL/get-random-song")
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Random song retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Random Song JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to get a random song."
+    echo "Failed to get meal by name."
     exit 1
   fi
 }
@@ -183,41 +168,6 @@ add_song_to_playlist() {
   fi
 }
 
-remove_song_from_playlist() {
-  artist=$1
-  title=$2
-  year=$3
-
-  echo "Removing song from playlist: $artist - $title ($year)..."
-  response=$(curl -s -X DELETE "$BASE_URL/remove-song-from-playlist" \
-    -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song removed from playlist successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to remove song from playlist."
-    exit 1
-  fi
-}
-
-remove_song_by_track_number() {
-  track_number=$1
-
-  echo "Removing song by track number: $track_number..."
-  response=$(curl -s -X DELETE "$BASE_URL/remove-song-from-playlist-by-track-number/$track_number")
-
-  if echo "$response" | grep -q '"status":'; then
-    echo "Song removed from playlist by track number ($track_number) successfully."
-  else
-    echo "Failed to remove song from playlist by track number."
-    exit 1
-  fi
-}
 
 clear_playlist() {
   echo "Clearing playlist..."
@@ -311,135 +261,6 @@ get_current_song() {
   fi
 }
 
-get_playlist_length_duration() {
-  echo "Retrieving playlist length and duration..."
-  response=$(curl -s -X GET "$BASE_URL/get-playlist-length-duration")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist length and duration retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Playlist Info JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to retrieve playlist length and duration."
-    exit 1
-  fi
-}
-
-go_to_track_number() {
-  track_number=$1
-  echo "Going to track number ($track_number)..."
-  response=$(curl -s -X POST "$BASE_URL/go-to-track-number/$track_number")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Moved to track number ($track_number) successfully."
-  else
-    echo "Failed to move to track number ($track_number)."
-    exit 1
-  fi
-}
-
-play_entire_playlist() {
-  echo "Playing entire playlist..."
-  curl -s -X POST "$BASE_URL/play-entire-playlist" | grep -q '"status": "success"'
-  if [ $? -eq 0 ]; then
-    echo "Entire playlist played successfully."
-  else
-    echo "Failed to play entire playlist."
-    exit 1
-  fi
-}
-
-# Function to play the rest of the playlist
-play_rest_of_playlist() {
-  echo "Playing rest of the playlist..."
-  curl -s -X POST "$BASE_URL/play-rest-of-playlist" | grep -q '"status": "success"'
-  if [ $? -eq 0 ]; then
-    echo "Rest of playlist played successfully."
-  else
-    echo "Failed to play rest of playlist."
-    exit 1
-  fi
-}
-
-############################################################
-#
-# Arrange Playlist
-#
-############################################################
-
-move_song_to_beginning() {
-  artist=$1
-  title=$2
-  year=$3
-
-  echo "Moving song ($artist - $title, $year) to the beginning of the playlist..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-beginning" \
-    -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to the beginning successfully."
-  else
-    echo "Failed to move song to the beginning."
-    exit 1
-  fi
-}
-
-move_song_to_end() {
-  artist=$1
-  title=$2
-  year=$3
-
-  echo "Moving song ($artist - $title, $year) to the end of the playlist..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-end" \
-    -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to the end successfully."
-  else
-    echo "Failed to move song to the end."
-    exit 1
-  fi
-}
-
-move_song_to_track_number() {
-  artist=$1
-  title=$2
-  year=$3
-  track_number=$4
-
-  echo "Moving song ($artist - $title, $year) to track number ($track_number)..."
-  response=$(curl -s -X POST "$BASE_URL/move-song-to-track-number" \
-    -H "Content-Type: application/json" \
-    -d "{\"artist\": \"$artist\", \"title\": \"$title\", \"year\": $year, \"track_number\": $track_number}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song moved to track number ($track_number) successfully."
-  else
-    echo "Failed to move song to track number ($track_number)."
-    exit 1
-  fi
-}
-
-swap_songs_in_playlist() {
-  track_number1=$1
-  track_number2=$2
-
-  echo "Swapping songs at track numbers ($track_number1) and ($track_number2)..."
-  response=$(curl -s -X POST "$BASE_URL/swap-songs-in-playlist" \
-    -H "Content-Type: application/json" \
-    -d "{\"track_number_1\": $track_number1, \"track_number_2\": $track_number2}")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Songs swapped successfully between track numbers ($track_number1) and ($track_number2)."
-  else
-    echo "Failed to swap songs."
-    exit 1
-  fi
-}
 
 ######################################################
 #
@@ -448,11 +269,11 @@ swap_songs_in_playlist() {
 ######################################################
 
 # Function to get the song leaderboard sorted by play count
-get_song_leaderboard() {
-  echo "Getting song leaderboard sorted by play count..."
-  response=$(curl -s -X GET "$BASE_URL/song-leaderboard?sort=play_count")
+get_leaderboard() {
+  echo "Getting  leaderboard sorted by wins..."
+  response=$(curl -s -X GET "$BASE_URL/leaderboard?sort_by=wins")
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song leaderboard retrieved successfully."
+    echo "leaderboard retrieved successfully."
     if [ "$ECHO_JSON" = true ]; then
       echo "Leaderboard JSON (sorted by play count):"
       echo "$response" | jq .
@@ -469,21 +290,26 @@ check_health
 check_db
 
 # Clear the catalog
-clear_leaderboard
+clear_catalog
 
 # Create songs
-create_meal "Spaghetti" "Italian" 12.5 "MED" 
+#create_meal "Spaghetti" "Italian" 12.5 "MED" 
 create_meal "Pasta" "Italian" 20 "LOW" 
 create_meal "Burger" "American" 13 "HIGH" 
 create_meal "Sushi" "Japanese" 15 "LOW" 
 create_meal "Hummus" "Arabic" 5 "MED" 
 
-delete_meal_by_id 1
+delete_meal 1
+#delete_meal 2
+#delete_meal 3
+#delete_meal 4
+#delete_meal 5
+get_combatants
 get_leaderboard
 
 get_meal_by_id 2
-get_song_by_compound_key "The Beatles" "Let It Be" 1970
-get_random_song
+get_meal_by_name "Pizza" "Italian" 12.5
+#get_random_song
 
 clear_playlist
 
