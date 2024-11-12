@@ -310,39 +310,9 @@ get_leaderboard
 get_meal_by_id 2
 get_meal_by_name "Burger"
 #get_random_song
+battle
+prep_combatants
+clear_combatants
 
-clear_playlist
-
-add_song_to_playlist "The Rolling Stones" "Paint It Black" 1966
-add_song_to_playlist "Queen" "Bohemian Rhapsody" 1975
-add_song_to_playlist "Led Zeppelin" "Stairway to Heaven" 1971
-add_song_to_playlist "The Beatles" "Let It Be" 1970
-
-remove_song_from_playlist "The Beatles" "Let It Be" 1970
-remove_song_by_track_number 2
-
-get_all_songs_from_playlist
-
-add_song_to_playlist "Queen" "Bohemian Rhapsody" 1975
-add_song_to_playlist "The Beatles" "Let It Be" 1970
-
-move_song_to_beginning "The Beatles" "Let It Be" 1970
-move_song_to_end "Queen" "Bohemian Rhapsody" 1975
-move_song_to_track_number "Led Zeppelin" "Stairway to Heaven" 1971 2
-swap_songs_in_playlist 1 2
-
-get_all_songs_from_playlist
-get_song_from_playlist_by_track_number 1
-
-get_playlist_length_duration
-
-play_current_song
-rewind_playlist
-
-play_entire_playlist
-play_current_song
-play_rest_of_playlist
-
-get_song_leaderboard
 
 echo "All tests passed successfully!"
