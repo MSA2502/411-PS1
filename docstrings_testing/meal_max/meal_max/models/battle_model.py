@@ -90,7 +90,7 @@ class BattleModel:
     
     def clear_combatants(self):
         """
-        Clears all combatants frim the combatants list.
+        Clears all combatants from the combatants list.
         """
         logger.info("Clearing the combatants list.")
         self.combatants.clear()
