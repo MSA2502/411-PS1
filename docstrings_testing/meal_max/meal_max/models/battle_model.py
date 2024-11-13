@@ -35,6 +35,9 @@ class BattleModel:
 
         Raises:
             ValueError: If combatatants has less than two combatants.
+        
+        Returns:
+            The name of the winning meal
         """
         logger.info("Two meals enter, one meal leaves!")
 
