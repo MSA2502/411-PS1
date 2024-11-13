@@ -159,12 +159,12 @@ clear_combatants() {
 }
 
 prep_combatant() {
-  name=$1
+  meal=$1
 
-  echo "Adding song to playlist: $artist - $title ($year)..."
-  response=$(curl -s -X POST "$BASE_URL/add-song-to-playlist" \
+  echo "Adding combatant..."
+  response=$(curl -s -X POST "$BASE_URL/prep-combatant" \
     -H "Content-Type: application/json" \
-    -d "{\"meal\":\"$name\"}")
+    -d "{\"meal\":\"$meal\"}")
 
   if echo "$response" | grep -q '"status": "success"'; then
     echo "Combatant prepped succesfully."
@@ -178,84 +178,8 @@ prep_combatant() {
   fi
 }
 
-
-clear_playlist() {
-  echo "Clearing playlist..."
-  response=$(curl -s -X POST "$BASE_URL/clear-playlist")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist cleared successfully."
-  else
-    echo "Failed to clear playlist."
-    exit 1
-  fi
-}
-
-
-############################################################
-#
-# Play Playlist
-#
-############################################################
-
-play_current_song() {
-  echo "Playing current song..."
-  response=$(curl -s -X POST "$BASE_URL/play-current-song")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Current song is now playing."
-  else
-    echo "Failed to play current song."
-    exit 1
-  fi
-}
-
-rewind_playlist() {
-  echo "Rewinding playlist..."
-  response=$(curl -s -X POST "$BASE_URL/rewind-playlist")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Playlist rewound successfully."
-  else
-    echo "Failed to rewind playlist."
-    exit 1
-  fi
-}
-
-get_all_songs_from_playlist() {
-  echo "Retrieving all songs from playlist..."
-  response=$(curl -s -X GET "$BASE_URL/get-all-songs-from-playlist")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "All songs retrieved successfully."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Songs JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to retrieve all songs from playlist."
-    exit 1
-  fi
-}
-
-get_song_from_playlist_by_track_number() {
-  track_number=$1
-  echo "Retrieving song by track number ($track_number)..."
-  response=$(curl -s -X GET "$BASE_URL/get-song-from-playlist-by-track-number/$track_number")
-
-  if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song retrieved successfully by track number."
-    if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
-      echo "$response" | jq .
-    fi
-  else
-    echo "Failed to retrieve song by track number."
-    exit 1
-  fi
-}
-
 battle() {
+
   echo "Battle..."
   response=$(curl -s -X GET "$BASE_URL/battle")
 
@@ -303,7 +227,7 @@ check_db
 clear_meals
 
 # Create songs
-#create_meal "Spaghetti" "Italian" 12.5 "MED" 
+create_meal "Spaghetti" "Italian" 12.5 "MED" 
 create_meal "Pasta" "Italian" 20 "LOW" 
 create_meal "Burger" "American" 13 "HIGH" 
 create_meal "Sushi" "Japanese" 15 "LOW" 
@@ -320,8 +244,9 @@ get_leaderboard
 get_meal_by_id 2
 get_meal_by_name "Burger"
 #get_random_song
+prep_combatant "Pasta"
+prep_combatant "Burger"
 battle
-prep_combatant
 clear_combatants
 
 
