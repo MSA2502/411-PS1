@@ -49,13 +49,13 @@ check_db() {
 
 ##########################################################
 #
-# Song Management
+# Meal Management
 #
 ##########################################################
 
-clear_catalog() {
-  echo "Clearing the playlist..."
-  curl -s -X DELETE "$BASE_URL/clear-catalog" | grep -q '"status": "success"'
+clear_meals() {
+  echo "Clearing the meals..."
+  curl -s -X DELETE "$BASE_URL/clear-meals" | grep -q '"status": "success"'
 }
 
 
@@ -142,28 +142,38 @@ get_meal_by_name() {
 
 ############################################################
 #
-# Playlist Management
+# Battle Management
 #
 ############################################################
 
-add_song_to_playlist() {
-  artist=$1
-  title=$2
-  year=$3
+clear_combatants() {
+  echo "Clearing combatatants..."
+  response=$(curl -s -X POST "$BASE_URL/clear-combatants")
+
+  if echo "$response" | grep -q '"status": "success"'; then
+    echo "Combatants successfully."
+  else
+    echo "Failed to clear combatants."
+    exit 1
+  fi
+}
+
+prep_combatant() {
+  name=$1
 
   echo "Adding song to playlist: $artist - $title ($year)..."
   response=$(curl -s -X POST "$BASE_URL/add-song-to-playlist" \
     -H "Content-Type: application/json" \
-    -d "{\"artist\":\"$artist\", \"title\":\"$title\", \"year\":$year}")
+    -d "{\"meal\":\"$name\"}")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Song added to playlist successfully."
+    echo "Combatant prepped succesfully."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Song JSON:"
+      echo "Meal JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to add song to playlist."
+    echo "Failed prep combatant"
     exit 1
   fi
 }
@@ -245,18 +255,18 @@ get_song_from_playlist_by_track_number() {
   fi
 }
 
-get_current_song() {
-  echo "Retrieving current song..."
-  response=$(curl -s -X GET "$BASE_URL/get-current-song")
+battle() {
+  echo "Battle..."
+  response=$(curl -s -X GET "$BASE_URL/battle")
 
   if echo "$response" | grep -q '"status": "success"'; then
-    echo "Current song retrieved successfully."
+    echo "Battle successful."
     if [ "$ECHO_JSON" = true ]; then
-      echo "Current Song JSON:"
+      echo "Battle JSON:"
       echo "$response" | jq .
     fi
   else
-    echo "Failed to retrieve current song."
+    echo "Failed to battle."
     exit 1
   fi
 }
@@ -289,8 +299,8 @@ get_leaderboard() {
 check_health
 check_db
 
-# Clear the catalog
-clear_catalog
+# Clear the meals
+clear_meals
 
 # Create songs
 #create_meal "Spaghetti" "Italian" 12.5 "MED" 
@@ -311,7 +321,7 @@ get_meal_by_id 2
 get_meal_by_name "Burger"
 #get_random_song
 battle
-prep_combatants
+prep_combatant
 clear_combatants
 
 
